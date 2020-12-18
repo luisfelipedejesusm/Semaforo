@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import Light from './Light';
 import ControlButton from './ControlButton';
 import db from './../index.js';
-
+var mqtt = require('mqtt')
+var client  = mqtt.connect('mqtt://localhost:1883');
 
 function useInterval(callback, delay) {
   const savedCallback = useRef();
@@ -24,17 +25,24 @@ function useInterval(callback, delay) {
 }
 
 function writeColorFirebase(color) {
-  var database = db.database();
+  /* var database = db.database();
   db.database().ref("/").set({
     color: color
+  }); */
+
+  client.on('connect', () => {
+    client.subscribe('time');
   });
+
+  client.on('message', (topic, message) =>{
+    console.log("Hello")
+    setIsStarted(true);
+    setCounter(message.parseInt()*1000)
+    setTimeout(
+    client.publish('color_inverse', color), message.parseInt()*1000)
+  })
+  
 }
-
-
-
-
-
-
 
 export default function App() {
   const SIGNAL_DELAY = 5;
@@ -61,8 +69,6 @@ export default function App() {
         setCounter(3);
         writeColorFirebase('yellow');
       }
-      // writeColorFirebase(lightOn);
-      // setCounter(SIGNAL_DELAY);
     }
   }, delay);
 
