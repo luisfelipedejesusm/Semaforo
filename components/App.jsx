@@ -3,7 +3,11 @@ import Light from './Light';
 import ControlButton from './ControlButton';
 import db from './../index.js';
 var mqtt = require('mqtt')
-var client  = mqtt.connect('mqtt://localhost:1883');
+var client  = mqtt.connect('ws://localhost:5001');
+
+client.on('connect', () => {
+  client.subscribe('time');
+});
 
 function useInterval(callback, delay) {
   const savedCallback = useRef();
@@ -29,10 +33,6 @@ function writeColorFirebase(color) {
   db.database().ref("/").set({
     color: color
   }); */
-
-  client.on('connect', () => {
-    client.subscribe('time');
-  });
 
   client.on('message', (topic, message) =>{
     console.log("Hello")
